@@ -17,8 +17,13 @@ async function sendMessage() {
     if (userInput.trim() === "") return;
 
     appendMessage("user", userInput);
-    var botResponse = await getBotResponse(userInput);
-    appendMessage("bot", botResponse);
+    try {
+        var botResponse = await getBotResponse(userInput);
+        appendMessage("bot", botResponse);
+    } catch (error) {
+        console.error("Error fetching bot response:", error);
+        appendMessage("bot", "Sorry, I couldn't understand that.");
+    }
     document.getElementById("user-input").value = "";
 }
 
@@ -37,25 +42,26 @@ function appendMessage(sender, message) {
 }
 
 async function getBotResponse(userInput) {
-    try {
-        var apiKey = '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';
-        var apiUrl = 'https://api.openai.com/v1/completions';
-        var response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + apiKey
-            },
-            body: JSON.stringify({
-                model: 'text-davinci-003', // You can use other models as well
-                prompt: userInput,
-                max_tokens: 100
-            })
-        });
-        var data = await response.json();
-        return data.choices[0].text.trim();
-    } catch (error) {
-        console.error("Error fetching bot response:", error);
-        return "Sorry, I couldn't understand that.";
+    var apiKey = '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';
+    var apiUrl = 'https://api.openai.com/v1/completions';
+    var response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + apiKey
+        },
+        body: JSON.stringify({
+            model: 'text-davinci-003',
+            prompt: userInput,
+            max_tokens: 100
+        })
+    });
+    if (!response.ok) {
+        throw new Error('Failed to fetch bot response');
     }
+    var data = await response.json();
+    if (!data.choices || data.choices.length === 0) {
+        throw new Error('Empty response from bot');
+    }
+    return data.choices[0].text.trim();
 }
