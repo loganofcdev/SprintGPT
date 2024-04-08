@@ -38,7 +38,6 @@ function appendMessage(sender, message) {
 
 async function getBotResponse(userInput) {
     try {
-        // Replace 'YOUR_API_KEY' with your actual OpenAI API key
         var apiKey = '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';
         var apiUrl = 'https://api.openai.com/v1/completions';
         var response = await fetch(apiUrl, {
